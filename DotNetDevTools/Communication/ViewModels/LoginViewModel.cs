@@ -1,15 +1,18 @@
-﻿using Prism.Commands;
+﻿using DevToolsClientCore.Async;
+using DevToolsClientCore.Socket;
+
+using Prism.Commands;
 using Prism.Mvvm;
+
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Communication.ViewModels
 {
     public class LoginViewModel : BindableBase
     {
+        private readonly ICommunicationService _communication;
+
         private Uri _remote;
         public Uri Remote
         {
@@ -26,15 +29,23 @@ namespace Communication.ViewModels
 
         public ICommand LoginCommand => new DelegateCommand(Login);
 
-        public LoginViewModel()
+        public LoginViewModel(ICommunicationService pCom)
         {
-            Remote = new Uri("localhost:12000");
-            State = "En attente de connexion ...";
+            _communication = pCom;
+            _communication.OnStateChanged += OnStateChangedHandler;
+
+            Remote = new Uri("ws://localhost:12000");
+            State = _communication.State;
         }
 
         private void Login()
         {
-            
+            _communication.StartAsync(Remote).RunSafe();
+        }
+
+        private void OnStateChangedHandler(object sender, EventArgs e)
+        {
+            State = _communication.State;
         }
     }
 }

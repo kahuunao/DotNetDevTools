@@ -1,5 +1,6 @@
 ﻿using Communication;
 using DevToolsClient.Views;
+using DevToolsClientCore.Socket;
 using Logs;
 using Prism.Ioc;
 using Prism.Modularity;
@@ -19,7 +20,7 @@ namespace DevToolsClient
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-
+            containerRegistry.Register<ICommunicationService, CommunicationService>();
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

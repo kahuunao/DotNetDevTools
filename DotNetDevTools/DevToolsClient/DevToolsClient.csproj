@@ -98,6 +98,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>11.0.2</Version>
+    </PackageReference>
     <PackageReference Include="NLog">
       <Version>4.5.11</Version>
     </PackageReference>
@@ -113,6 +116,10 @@
     <ProjectReference Include="..\Communication\Communication.csproj">
       <Project>{B19ED883-5DBB-4CA1-B32E-0EF7E86DD3C9}</Project>
       <Name>Communication</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DevToolsClientCore\DevToolsClientCore.csproj">
+      <Project>{B349E9C2-FD79-4E80-B863-DAE8395F20F3}</Project>
+      <Name>DevToolsClientCore</Name>
     </ProjectReference>
     <ProjectReference Include="..\Logs\Logs.csproj">
       <Project>{820165BA-2577-49AC-A9F4-24F2221DF632}</Project>
