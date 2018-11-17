@@ -1,5 +1,6 @@
-﻿using DevToolsClientCore.Async;
-using DevToolsClientCore.Socket;
+﻿using DevToolsClientCore.Socket;
+
+using DevToolsConnector;
 
 using Prism.Commands;
 using Prism.Mvvm;
@@ -11,7 +12,7 @@ namespace Communication.ViewModels
 {
     public class LoginViewModel : BindableBase
     {
-        private readonly ICommunicationService _communication;
+        private readonly IDevRequestService _communication;
 
         private Uri _remote;
         public Uri Remote
@@ -29,7 +30,7 @@ namespace Communication.ViewModels
 
         public ICommand LoginCommand => new DelegateCommand(Login);
 
-        public LoginViewModel(ICommunicationService pCom)
+        public LoginViewModel(IDevRequestService pCom)
         {
             _communication = pCom;
             _communication.OnStateChanged += OnStateChangedHandler;

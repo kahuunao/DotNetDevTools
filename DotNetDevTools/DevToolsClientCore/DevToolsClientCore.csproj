@@ -67,13 +67,17 @@
     <Compile Include="Async\NotifyTaskCompletion.cs" />
     <Compile Include="Async\NotifyTaskCompletion{T}.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Socket\CommunicationService.cs" />
-    <Compile Include="Socket\ICommunicationService.cs" />
+    <Compile Include="Socket\DevRequestService.cs" />
+    <Compile Include="Socket\IDevRequestService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DevToolsConnector\DevToolsConnector.csproj">
+      <Project>{A00B0DD3-BB5D-4CE4-937F-2E1B643523A7}</Project>
+      <Name>DevToolsConnector</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DevToolsMessage\DevToolsMessage.csproj">
       <Project>{230740ad-ba4c-486f-9a39-6231b86b5b3d}</Project>
       <Name>DevToolsMessage</Name>

@@ -93,6 +93,14 @@
       <Project>{B349E9C2-FD79-4E80-B863-DAE8395F20F3}</Project>
       <Name>DevToolsClientCore</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DevToolsConnector\DevToolsConnector.csproj">
+      <Project>{A00B0DD3-BB5D-4CE4-937F-2E1B643523A7}</Project>
+      <Name>DevToolsConnector</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DevToolsMessage\DevToolsMessage.csproj">
+      <Project>{230740ad-ba4c-486f-9a39-6231b86b5b3d}</Project>
+      <Name>DevToolsMessage</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

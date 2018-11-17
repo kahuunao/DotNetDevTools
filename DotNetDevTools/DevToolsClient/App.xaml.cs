@@ -20,7 +20,7 @@ namespace DevToolsClient
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.Register<ICommunicationService, CommunicationService>();
+            containerRegistry.Register<IDevRequestService, DevRequestService>();
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

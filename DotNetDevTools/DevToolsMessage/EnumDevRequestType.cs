@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DevToolsMessage
+﻿namespace DevToolsMessage
 {
     public enum EnumDevRequestType
     {
         UNDEFINED,
-        GET_FILE_CONFIG
+        GET_FILE_CONFIG,
+        LOG_LINE
     }
 }
