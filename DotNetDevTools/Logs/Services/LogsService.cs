@@ -1,4 +1,5 @@
-﻿using DevToolsConnector;
+﻿using DevToolsConnector.Common;
+using DevToolsConnector.Inspector;
 
 using DevToolsMessage;
 using DevToolsMessage.Request;
@@ -28,12 +29,15 @@ namespace Logs.Services
 
         private void OnLogReceived(IDevSocket pSocket, DevMessage pMessage)
         {
-            LOGGER.Debug("Réception de logs");
-            if (pMessage != null && pMessage.Request != null && pMessage.Request.LogLine != null)
+            if (pMessage.IsRequest())
             {
-                Logs.AddRange(pMessage.Request.LogLine);
+                LOGGER.Debug("Réception de logs");
+                if (pMessage != null && pMessage.Request != null && pMessage.Request.LogLine != null)
+                {
+                    Logs.AddRange(pMessage.Request.LogLine);
+                }
+                pSocket.RespondAt(pMessage);
             }
-            pSocket.RespondAt(pMessage);
         }
 
         private void OnConnectChangedHandler(object sender, System.EventArgs e)
@@ -48,7 +52,8 @@ namespace Logs.Services
                 LOGGER.Debug("Envoi de la configuration des logs attendues");
                 await _client.SendMessage(new DevMessage
                 {
-                    RequestType = EnumDevMessageType.SET_LOG_CONFIG
+                    RequestType = EnumDevMessageType.SET_LOG_CONFIG,
+                    Request = new DevRequest()
                 });
             }
         }

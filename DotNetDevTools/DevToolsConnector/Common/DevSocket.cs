@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DevToolsConnector.Impl
+namespace DevToolsConnector.Common
 {
     public class DevSocket : IDevSocket
     {
@@ -147,7 +147,7 @@ namespace DevToolsConnector.Impl
                 IsConnected = pSocket != null && pSocket.Connected; 
 
                 Listen().RunSafe();
-                AutoPing().RunSafe();
+                CheckConnection().RunSafe();
             }
         }
 
@@ -282,7 +282,7 @@ namespace DevToolsConnector.Impl
             }
             else
             {
-                await AutoPing(); // Check de l'état de la connexion
+                await CheckConnection(); // Check de l'état de la connexion
             }
             return size;
         }
@@ -306,7 +306,8 @@ namespace DevToolsConnector.Impl
 
             while (byteRemaining > 0)
             {
-                byteRead = await _stream.ReadAsync(pBuffer, 0, pBuffer.Length);
+                int byteToRead = byteRemaining > pBuffer.Length ? pBuffer.Length : byteRemaining;
+                byteRead = await _stream.ReadAsync(pBuffer, 0, byteToRead);
                 if (byteRead > 0)
                 {
                     responseData += Encoding.ASCII.GetString(pBuffer, 0, byteRead);
@@ -339,13 +340,13 @@ namespace DevToolsConnector.Impl
         /// Ping régulièrement la connexion pour vérifier l'état de celle-ci
         /// </summary>
         /// <returns></returns>
-        private async Task AutoPing()
+        private async Task CheckConnection()
         {
             while (Socket != null && Socket.Connected)
             {
                 try
                 {
-                    LOGGER.Trace("Vérification de l'état de la connexion");
+                    //LOGGER.Trace("Ping");
                     await _stream.WriteAsync(new byte[0], 0, 0);
                     await _stream.FlushAsync();
                     await Task.Delay(500);

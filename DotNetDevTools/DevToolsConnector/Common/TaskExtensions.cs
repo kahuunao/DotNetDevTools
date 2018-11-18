@@ -1,10 +1,10 @@
 ﻿using NLog;
+
 using System;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
-namespace DevToolsConnector
+namespace DevToolsConnector.Common
 {
     public static class TaskExtensions
     {

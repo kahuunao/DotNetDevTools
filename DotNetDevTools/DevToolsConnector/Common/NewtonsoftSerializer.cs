@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace DevToolsConnector.Impl
+namespace DevToolsConnector.Common
 {
     public class NewtonsoftSerializer : IDevMessageSerializer
     {

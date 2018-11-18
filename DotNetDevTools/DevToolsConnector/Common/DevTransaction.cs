@@ -5,7 +5,7 @@ using NLog;
 using System;
 using System.Threading.Tasks;
 
-namespace DevToolsConnector
+namespace DevToolsConnector.Common
 {
     /// <summary>
     /// Réalise un échange requête - response pouvant être attendue
@@ -21,8 +21,6 @@ namespace DevToolsConnector
         public DevTransaction(IDevSocket pSocket, DevMessage pRequest)
         {
             _socket = pSocket;
-            _socket.OnConnectionChanged += OnConnectionChanged;
-            _socket.OnMessageReceived += OnMessageReceived;
             _request = pRequest;
             _response = new TaskCompletionSource<DevMessage>();
         }
@@ -32,8 +30,14 @@ namespace DevToolsConnector
             DevMessage result = null;
             try
             {
-                await _socket.Send(_request);
-                result = await _response.Task;
+                if (_socket.IsConnected)
+                {
+                    _socket.OnConnectionChanged += OnConnectionChanged;
+                    _socket.OnMessageReceived += OnMessageReceived;
+
+                    await _socket.Send(_request);
+                    result = await _response.Task;
+                }
             }
             catch(TaskCanceledException)
             {
@@ -44,6 +48,12 @@ namespace DevToolsConnector
             {
                 LOGGER.Error(e);
                 _response.TrySetException(e);
+            }
+            finally
+            {
+                _socket.OnConnectionChanged -= OnConnectionChanged;
+                _socket.OnMessageReceived -= OnMessageReceived;
+                _socket = null;
             }
             return result;
         }

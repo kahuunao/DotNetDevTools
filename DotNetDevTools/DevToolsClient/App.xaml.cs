@@ -2,8 +2,8 @@
 
 using DevToolsClient.Views;
 
-using DevToolsConnector;
-using DevToolsConnector.Impl;
+using DevToolsConnector.Common;
+using DevToolsConnector.Inspector;
 
 using Logs;
 

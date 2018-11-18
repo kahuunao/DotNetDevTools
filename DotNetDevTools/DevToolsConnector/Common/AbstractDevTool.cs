@@ -1,10 +1,11 @@
 ﻿using DevToolsMessage;
+
 using NLog;
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
-namespace DevToolsConnector.Impl
+namespace DevToolsConnector.Common
 {
     public abstract class AbstractDevTool : IDevToolConnector
     {
@@ -70,10 +71,12 @@ namespace DevToolsConnector.Impl
 
         protected void DispatchMessage(IDevSocket pSocket, DevMessage pMessage)
         {
+            bool hasListener = false;
             GetListeners(pMessage.RequestType).ForEach((l) =>
             {
                 try
                 {
+                    hasListener = true;
                     l?.HandleResponse(pSocket, pMessage);
                 }
                 catch (Exception e)
@@ -81,21 +84,12 @@ namespace DevToolsConnector.Impl
                     LOGGER.Error(e, "Une erreur s'est produit pendant la gestion des messages");
                 }
             });
-        }
-    }
 
-    class FuncDevListener : IDevListener
-    {
-        public Action<IDevSocket, DevMessage> Fct { get; set; }
-
-        public FuncDevListener(Action<IDevSocket, DevMessage> pFct)
-        {
-            Fct = pFct;
-        }
-
-        public void HandleResponse(IDevSocket pSocket, DevMessage pMessage)
-        {
-            Fct?.Invoke(pSocket, pMessage);
+            if (!hasListener && pMessage.IsRequest())
+            {
+                // Message non interprété
+                pSocket.RespondAt(pMessage, null, false);
+            }
         }
     }
 }

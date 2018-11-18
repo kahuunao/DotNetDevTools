@@ -1,5 +1,5 @@
-﻿
-using DevToolsConnector;
+﻿using DevToolsConnector.Common;
+using DevToolsConnector.Inspector;
 
 using DevToolsMessage;
 
@@ -57,7 +57,6 @@ namespace Communication.ViewModels
             {
                 await _devTool.SendMessage(new DevMessage
                 {
-                    Id = Guid.NewGuid(),
                     RequestType = EnumDevMessageType.GET_LOG_CONFIG
                 });
             }

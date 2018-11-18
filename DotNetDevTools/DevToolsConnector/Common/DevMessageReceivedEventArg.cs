@@ -2,7 +2,7 @@
 
 using System;
 
-namespace DevToolsConnector
+namespace DevToolsConnector.Common
 {
     public class DevMessageReceivedEventArg : EventArgs
     {

@@ -1,12 +1,15 @@
 ﻿
+using DevToolsConnector.Common;
+
 using DevToolsMessage;
 using DevToolsMessage.Request;
+
 using NLog;
 
 using System;
 using System.Threading.Tasks;
 
-namespace DevToolsConnector.Impl
+namespace DevToolsConnector.Inspector
 {
     public class DevToolClient : AbstractDevTool, IDevToolClient
     {

@@ -1,15 +1,14 @@
-﻿using DevToolsMessage;
-using DevToolsMessage.Response;
+﻿using DevToolsConnector.Common;
 
 using NLog;
 
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace DevToolsConnector.Impl
+namespace DevToolsConnector.Inspected
 {
     /// <summary>
     /// Server de connexion pour les outils de développeur
@@ -18,14 +17,36 @@ namespace DevToolsConnector.Impl
     {
         private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
+        private readonly IDevSocketFactory _factory;
+
         private TcpListener _server;
-        private List<IDevSocket> _sockets = new List<IDevSocket>();
-        private IDevSocketFactory _factory;
+
+        private IDevSocket _client;
+        public IDevSocket Client
+        {
+            get
+            {
+                return _client;
+            }
+            private set
+            {
+                if (_client != null)
+                {
+                    _client.OnMessageReceived -= OnMessageReceivedHandler;
+                    _client.OnConnectionChanged -= OnConnectionChangedHandler;
+                }
+                _client = value;
+                if (_client != null)
+                {
+                    _client.OnMessageReceived += OnMessageReceivedHandler;
+                    _client.OnConnectionChanged += OnConnectionChangedHandler;
+                }
+            }
+        }
 
         public DevToolServer(IDevSocketFactory pFactory)
         {
             _factory = pFactory;
-            RegisterListener(EnumDevMessageType.IDENTIFICATION, IdentificationRequestHandler);
         }
 
         /// <summary>
@@ -60,10 +81,7 @@ namespace DevToolsConnector.Impl
             {
                 LOGGER.Debug("En attente d'un nouvelle connexion ...");
                 var newClient = await _server.AcceptTcpClientAsync();
-                IDevSocket s = _factory.BuildSocket();
-                s.UseConnectedSocket(newClient);
-                s.OnMessageReceived += (sender, e) => DispatchMessage(sender as IDevSocket, e.MessageReceived);
-                _sockets.Add(s);
+                RegisterSocket(newClient);
             }
         }
 
@@ -73,22 +91,41 @@ namespace DevToolsConnector.Impl
         public override void Close()
         {
             LOGGER.Debug("Fermeture des connexions dev");
-            _sockets.ForEach((s) => s?.Close());
-            _sockets.Clear();
-
+            Client?.Close();
+            Client = null;
             _server?.Stop();
             _server = null;
         }
 
-        private void IdentificationRequestHandler(IDevSocket pSocket, DevMessage pMessage)
+        private void RegisterSocket(TcpClient pNewSocket)
         {
-            pSocket.RespondAt(pMessage, new DevResponse
+            if (pNewSocket != null)
             {
-                Identification = new DevIdentificationResponse
+                try
                 {
-                    AppName = AppDomain.CurrentDomain.FriendlyName
+                    Client = _factory.BuildSocket();
+                    Client.UseConnectedSocket(pNewSocket);
                 }
-            });
+                catch (Exception e)
+                {
+                    LOGGER.Error(e, "Une erreur est survenue durant la prisez en charge d'une nouvelle connexion provenant de {0}", pNewSocket?.Client?.RemoteEndPoint);
+                    pNewSocket.Close();
+                    Client = null;
+                }
+            }
+        }
+
+        private void OnConnectionChangedHandler(object sender, EventArgs e)
+        {
+            if (Client != null && !Client.IsConnected)
+            {
+                Client = null;
+            }
+        }
+
+        private void OnMessageReceivedHandler(object sender, DevMessageReceivedEventArg e)
+        {
+            DispatchMessage(sender as IDevSocket, e.MessageReceived);
         }
     }
 }
