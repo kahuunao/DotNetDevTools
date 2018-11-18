@@ -3,7 +3,6 @@
 using NLog;
 
 using System;
-using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,10 +13,13 @@ namespace DevToolsConnector.Impl
     {
         private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
+        public event EventHandler<DevMessageReceivedEventArg> OnMessageReceived;
+        public event EventHandler OnConnectionChanged;
+
         public TcpClient Socket { get; private set; }
-        public IDevRequestHandler Handler { get; private set; }
         public IDevMessageSerializer Serializer { get; private set; }
 
+        private bool _isConnected;
         /// <summary>
         /// Indique si la connexion est établie
         /// </summary>
@@ -25,15 +27,22 @@ namespace DevToolsConnector.Impl
         {
             get
             {
-                return Socket != null && Socket.Connected;
+                return _isConnected;
+            }
+            set
+            {
+                if (_isConnected != value)
+                {
+                    _isConnected = value;
+                    OnConnectionChanged?.Invoke(this, EventArgs.Empty);
+                }
             }
         }
 
         private NetworkStream _stream;
 
-        public DevSocket(IDevRequestHandler pHandler, IDevMessageSerializer pSerializer)
+        public DevSocket(IDevMessageSerializer pSerializer)
         {
-            Handler = pHandler;
             Serializer = pSerializer;
         }
 
@@ -45,7 +54,7 @@ namespace DevToolsConnector.Impl
         public async Task<bool> Connect(Uri pRemote)
         {
             // Fermeture des précédents connexions
-            Stop();
+            Close();
 
             try
             {
@@ -72,14 +81,16 @@ namespace DevToolsConnector.Impl
         public void UseConnectedSocket(TcpClient socket)
         {
             // Fermeture des précédents connexions
-            Stop();
+            Close();
 
             LOGGER.Debug("Utilisation de la conexion provenant de {0}", socket?.Client?.RemoteEndPoint);
             SetSocket(socket);
         }
 
-        public void Stop()
+        public void Close()
         {
+            IsConnected = Socket != null && Socket.Connected;
+
             try
             {
                 if (_stream != null)
@@ -127,7 +138,8 @@ namespace DevToolsConnector.Impl
 
         private void SetSocket(TcpClient pSocket)
         {
-            if (pSocket != null && pSocket.Connected)
+            IsConnected = pSocket != null && pSocket.Connected;
+            if (IsConnected)
             {
                 Socket = pSocket;
                 _stream = Socket.GetStream();
@@ -136,15 +148,16 @@ namespace DevToolsConnector.Impl
             }
         }
 
-        public async Task Send(DevRequest pRequest)
+        public async Task Send(DevMessage pRequest)
         {
             if (pRequest == null)
             {
                 return;
             }
 
-            if (!IsConnected)
+            if (Socket == null || !Socket.Connected)
             {
+                IsConnected = false;
                 LOGGER.Warn("Impossible d'envoyer de message. Socket non connecté");
                 return;
             }
@@ -172,8 +185,17 @@ namespace DevToolsConnector.Impl
                     {
                         LOGGER.Error(e, "Une erreur est survenu durant l'envoi de données");
                     }
-                    Stop(); // On arrêt cette socket par précaution
+                    Close(); // On arrêt cette socket par précaution
                 }
+            }
+        }
+
+        public async Task RespondAt(DevMessage pRequest, DevResponse pResponse)
+        {
+            if (pRequest != null && pRequest.Id != Guid.Empty)
+            {
+                pRequest.Response = pResponse;
+                await Send(pRequest);
             }
         }
 
@@ -187,7 +209,7 @@ namespace DevToolsConnector.Impl
             try
             {
                 LOGGER.Debug("Prêt à réceptionner les données depuis {0}", Socket?.Client?.RemoteEndPoint);
-                while (IsConnected)
+                while (Socket != null && Socket.Connected)
                 {
                     await Read(datas);
                 }
@@ -202,7 +224,7 @@ namespace DevToolsConnector.Impl
                 {
                     LOGGER.Error(e, "Une erreur est survenue durant la lecture des données reçues");
                 }
-                Stop(); // On arrêt cette socket par précaution
+                Close(); // On arrêt cette socket par précaution
             }
         }
 
@@ -284,8 +306,8 @@ namespace DevToolsConnector.Impl
         {
             try
             {
-                DevRequest request = Serializer.DeserializeObject<DevRequest>(pMessage);
-                Handler?.HandleRequest(this, request);
+                DevMessage messageRead = Serializer.DeserializeObject<DevMessage>(pMessage);
+                OnMessageReceived?.Invoke(this, new DevMessageReceivedEventArg(messageRead));
             }
             catch (Exception e)
             {
@@ -313,6 +335,7 @@ namespace DevToolsConnector.Impl
                     {
                         LOGGER.Error(socketEx, "Une erreur réseau est survenue");
                     }
+                    IsConnected = Socket != null && Socket.Connected;
                 }
             }
         }

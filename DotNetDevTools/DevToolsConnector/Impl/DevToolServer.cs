@@ -10,7 +10,7 @@ namespace DevToolsConnector.Impl
     /// <summary>
     /// Server de connexion pour les outils de développeur
     /// </summary>
-    public class DevToolServer : IDevToolServer
+    public class DevToolServer : AbstractDevTool, IDevToolServer
     {
         private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
@@ -28,7 +28,7 @@ namespace DevToolsConnector.Impl
         /// </summary>
         /// <param name="pHandler"></param>
         /// <param name="pPort"></param>
-        public void Init(int? pPort = null)
+        public void Bound(int? pPort = null)
         {
             Close();
             
@@ -57,6 +57,7 @@ namespace DevToolsConnector.Impl
                 var newClient = await _server.AcceptTcpClientAsync();
                 IDevSocket s = _factory.BuildSocket();
                 s.UseConnectedSocket(newClient);
+                s.OnMessageReceived += (sender, e) => DispatchMessage(sender as IDevSocket, e.MessageReceived);
                 _sockets.Add(s);
             }
         }
@@ -64,10 +65,10 @@ namespace DevToolsConnector.Impl
         /// <summary>
         /// Ferme toutes les connexions
         /// </summary>
-        public void Close()
+        public override void Close()
         {
             LOGGER.Debug("Fermeture des connexions dev");
-            _sockets.ForEach((s) => s?.Stop());
+            _sockets.ForEach((s) => s?.Close());
             _sockets.Clear();
 
             _server?.Stop();

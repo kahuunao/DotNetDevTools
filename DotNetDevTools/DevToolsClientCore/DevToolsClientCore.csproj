@@ -67,9 +67,6 @@
     <Compile Include="Async\NotifyTaskCompletion.cs" />
     <Compile Include="Async\NotifyTaskCompletion{T}.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Socket\DevRequestHandler.cs" />
-    <Compile Include="Socket\DevRequestService.cs" />
-    <Compile Include="Socket\IDevRequestService.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -83,6 +80,9 @@
       <Project>{230740ad-ba4c-486f-9a39-6231b86b5b3d}</Project>
       <Name>DevToolsMessage</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Socket\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

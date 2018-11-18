@@ -1,8 +1,6 @@
 ﻿using DevToolsConnector;
 using DevToolsConnector.Impl;
-
 using DevToolsMessage;
-
 using NLog;
 
 using System;
@@ -15,26 +13,19 @@ namespace DevToolsConsole
 
         static void Main(string[] args)
         {
-            var handler = new Handler();
             var serializer = new NewtonsoftSerializer();
-
-            var server = new DevToolServer(new DevSocketFactory(handler, serializer));
-            server.Init();
+            var server = new DevToolServer(new DevSocketFactory(serializer));
+            server.RegisterListener(EnumDevMessageType.GET_FILE_CONFIG, OnFileConfigRequested);
+            server.Bound();
             LOGGER.Debug("Enter to stop console.");
             Console.ReadLine();
+            server.UnRegisterListener(EnumDevMessageType.GET_FILE_CONFIG, OnFileConfigRequested);
             server.Close();
         }
-    }
 
-    class Handler : IDevRequestHandler
-    {
-        public void HandleRequest(IDevSocket pSocket, DevRequest pRequest)
+        private static async void OnFileConfigRequested(IDevSocket pSocket, DevMessage pMessage)
         {
-            if (pRequest.RequestType == EnumDevRequestType.GET_FILE_CONFIG)
-            {
-                pRequest.Response = new DevResponse { Toto = "Merde" };
-                pSocket.Send(pRequest);
-            }
+            await pSocket.RespondAt(pMessage, new DevResponse { Toto = "Not found" });
         }
     }
 }

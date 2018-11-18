@@ -1,6 +1,6 @@
 ﻿namespace DevToolsMessage
 {
-    public enum EnumDevRequestType
+    public enum EnumDevMessageType
     {
         UNDEFINED,
         GET_FILE_CONFIG,

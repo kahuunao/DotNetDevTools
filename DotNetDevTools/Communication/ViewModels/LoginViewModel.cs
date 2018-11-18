@@ -1,7 +1,8 @@
-﻿using DevToolsClientCore.Socket;
-
+﻿
 using DevToolsConnector;
+
 using DevToolsMessage;
+
 using Prism.Commands;
 using Prism.Mvvm;
 
@@ -13,7 +14,7 @@ namespace Communication.ViewModels
 {
     public class LoginViewModel : BindableBase
     {
-        private readonly IDevRequestService _communication;
+        private readonly IDevToolClient _devTool;
 
         private Uri _remote;
         public Uri Remote
@@ -31,13 +32,13 @@ namespace Communication.ViewModels
 
         public ICommand LoginCommand => new DelegateCommand(Login);
 
-        public LoginViewModel(IDevRequestService pCom)
+        public LoginViewModel(IDevToolClient pCom)
         {
-            _communication = pCom;
-            _communication.OnStateChanged += OnStateChangedHandler;
+            _devTool = pCom;
+            _devTool.OnConnectChanged += OnConnectChanged;
 
-            Remote = new Uri("ws://localhost:12000");
-            State = _communication.State;
+            Remote = new Uri("tcp://localhost:12000");
+            State = (_devTool?.Socket?.IsConnected ?? false) ? "Connecté" : "Non Connecté";
         }
 
         private void Login()
@@ -45,19 +46,21 @@ namespace Communication.ViewModels
             Start().RunSafe();
         }
 
-        private void OnStateChangedHandler(object sender, EventArgs e)
+        private void OnConnectChanged(object sender, EventArgs e)
         {
-            State = _communication.State;
+            State = (_devTool?.Socket?.IsConnected ?? false) ? "Connecté" : "Non Connecté";
         }
 
         private async Task Start()
         {
-            await _communication.StartAsync(Remote);
-            await _communication.SendRequest(new DevRequest
+            if (await _devTool.Connect(Remote))
             {
-                Id = Guid.NewGuid(),
-                RequestType = EnumDevRequestType.GET_FILE_CONFIG,
-            });
+                await _devTool.SendMessage(new DevMessage
+                {
+                    Id = Guid.NewGuid(),
+                    RequestType = EnumDevMessageType.GET_FILE_CONFIG,
+                });
+            }
         }
     }
 }

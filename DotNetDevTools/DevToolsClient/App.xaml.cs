@@ -1,11 +1,15 @@
 ﻿using Communication;
+
 using DevToolsClient.Views;
-using DevToolsClientCore.Socket;
+
 using DevToolsConnector;
 using DevToolsConnector.Impl;
+
 using Logs;
+
 using Prism.Ioc;
 using Prism.Modularity;
+
 using System.Windows;
 
 namespace DevToolsClient
@@ -22,8 +26,7 @@ namespace DevToolsClient
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.Register<IDevRequestService, DevRequestService>();
-            containerRegistry.Register<IDevRequestHandler, DevRequestHandler>();
+            containerRegistry.Register<IDevToolClient, DevToolClient>();
             containerRegistry.Register<IDevSocketFactory, DevSocketFactory>();
             containerRegistry.Register<IDevMessageSerializer, NewtonsoftSerializer>();
         }

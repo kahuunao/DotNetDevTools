@@ -1,8 +1,7 @@
 ﻿namespace DevToolsConnector
 {
-    public interface IDevToolServer
+    public interface IDevToolServer : IDevToolConnector
     {
-        void Init(int? pPort = null);
-        void Close();
+        void Bound(int? pPort = null);
     }
 }
