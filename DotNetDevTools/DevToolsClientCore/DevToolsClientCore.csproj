@@ -67,6 +67,7 @@
     <Compile Include="Async\NotifyTaskCompletion.cs" />
     <Compile Include="Async\NotifyTaskCompletion{T}.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Socket\DevRequestHandler.cs" />
     <Compile Include="Socket\DevRequestService.cs" />
     <Compile Include="Socket\IDevRequestService.cs" />
   </ItemGroup>

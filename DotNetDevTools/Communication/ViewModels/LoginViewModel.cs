@@ -1,11 +1,12 @@
 ﻿using DevToolsClientCore.Socket;
 
 using DevToolsConnector;
-
+using DevToolsMessage;
 using Prism.Commands;
 using Prism.Mvvm;
 
 using System;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Communication.ViewModels
@@ -41,12 +42,22 @@ namespace Communication.ViewModels
 
         private void Login()
         {
-            _communication.StartAsync(Remote).RunSafe();
+            Start().RunSafe();
         }
 
         private void OnStateChangedHandler(object sender, EventArgs e)
         {
             State = _communication.State;
+        }
+
+        private async Task Start()
+        {
+            await _communication.StartAsync(Remote);
+            await _communication.SendRequest(new DevRequest
+            {
+                Id = Guid.NewGuid(),
+                RequestType = EnumDevRequestType.GET_FILE_CONFIG,
+            });
         }
     }
 }

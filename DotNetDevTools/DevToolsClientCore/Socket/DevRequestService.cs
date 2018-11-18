@@ -9,13 +9,14 @@ using System.Threading.Tasks;
 
 namespace DevToolsClientCore.Socket
 {
-    public class DevRequestService : IDevRequestService, IDevRequestHandler
+    public class DevRequestService : IDevRequestService
     {
         private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
         public event EventHandler OnStateChanged;
 
-        private DevSocket _socket;
+        private readonly IDevSocketFactory _factory;
+        private IDevSocket _socket;
 
         private string _state = "En attente de connexion";
         public string State
@@ -34,9 +35,9 @@ namespace DevToolsClientCore.Socket
             }
         }
 
-        public DevRequestService()
+        public DevRequestService(IDevSocketFactory pFactory)
         {
-
+            _factory = pFactory;
         }
 
         public async Task<bool> StartAsync(Uri pRemote)
@@ -44,7 +45,7 @@ namespace DevToolsClientCore.Socket
             // Fermeture des précédents connexions
             Stop();
 
-            _socket = new DevSocket(this);
+            _socket = _factory.BuildSocket();
             var isConnected =  await _socket.Connect(pRemote);
             State = isConnected ? "Connecté" : "Echec de connexion";
             return isConnected;
@@ -61,12 +62,7 @@ namespace DevToolsClientCore.Socket
 
         public Task SendRequest(DevRequest pRequest)
         {
-            throw new NotImplementedException();
-        }
-
-        public void HandleRequest(DevSocket pSocket, DevRequest pRequest)
-        {
-            throw new NotImplementedException();
+            return _socket?.Send(pRequest);
         }
     }
 }

@@ -4,6 +4,6 @@ namespace DevToolsConnector
 {
     public interface IDevRequestHandler
     {
-        void HandleRequest(DevSocket pSocket, DevRequest pRequest);
+        void HandleRequest(IDevSocket pSocket, DevRequest pRequest);
     }
 }

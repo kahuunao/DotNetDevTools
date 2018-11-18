@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 
-namespace DevToolsConnector
+namespace DevToolsConnector.Impl
 {
     /// <summary>
     /// Server de connexion pour les outils de développeur
@@ -15,19 +15,23 @@ namespace DevToolsConnector
         private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
         private TcpListener _server;
-        private List<DevSocket> _sockets = new List<DevSocket>();
-        private IDevRequestHandler _handler;
+        private List<IDevSocket> _sockets = new List<IDevSocket>();
+        private IDevSocketFactory _factory;
+
+        public DevToolServer(IDevSocketFactory pFactory)
+        {
+            _factory = pFactory;
+        }
 
         /// <summary>
         /// Initialisation du server
         /// </summary>
         /// <param name="pHandler"></param>
         /// <param name="pPort"></param>
-        public void Init(IDevRequestHandler pHandler, int? pPort = null)
+        public void Init(int? pPort = null)
         {
             Close();
-
-            _handler = pHandler;
+            
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Loopback, pPort ?? 12000);
             LOGGER.Debug("Démarrage du serveur ", localEndPoint);
             _server = new TcpListener(localEndPoint);
@@ -51,7 +55,7 @@ namespace DevToolsConnector
             {
                 LOGGER.Debug("En attente d'un nouvelle connexion ...");
                 var newClient = await _server.AcceptTcpClientAsync();
-                var s = new DevSocket(_handler);
+                IDevSocket s = _factory.BuildSocket();
                 s.UseConnectedSocket(newClient);
                 _sockets.Add(s);
             }

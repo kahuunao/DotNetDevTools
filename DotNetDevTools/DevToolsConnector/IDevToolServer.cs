@@ -2,7 +2,7 @@
 {
     public interface IDevToolServer
     {
-        void Init(IDevRequestHandler pHandler, int? pPort = null);
+        void Init(int? pPort = null);
         void Close();
     }
 }
