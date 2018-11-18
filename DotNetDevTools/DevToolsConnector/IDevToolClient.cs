@@ -9,6 +9,7 @@ namespace DevToolsConnector
     public interface IDevToolClient : IDevToolConnector
     {
         event EventHandler OnConnectChanged;
+        bool IsConnected { get; }
 
         IDevSocket Socket { get; }
 

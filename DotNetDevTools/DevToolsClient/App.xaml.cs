@@ -26,9 +26,9 @@ namespace DevToolsClient
 
         protected override void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            containerRegistry.Register<IDevToolClient, DevToolClient>();
-            containerRegistry.Register<IDevSocketFactory, DevSocketFactory>();
-            containerRegistry.Register<IDevMessageSerializer, NewtonsoftSerializer>();
+            containerRegistry.RegisterSingleton<IDevToolClient, DevToolClient>();
+            containerRegistry.RegisterSingleton<IDevSocketFactory, DevSocketFactory>();
+            containerRegistry.RegisterSingleton<IDevMessageSerializer, NewtonsoftSerializer>();
         }
 
         protected override void ConfigureModuleCatalog(IModuleCatalog moduleCatalog)

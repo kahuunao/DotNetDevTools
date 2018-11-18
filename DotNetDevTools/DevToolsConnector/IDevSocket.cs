@@ -43,7 +43,8 @@ namespace DevToolsConnector
         /// </summary>
         /// <param name="pRequest">Requête reçue</param>
         /// <param name="pResponse">Réponse à celle-ci</param>
+        /// <param name="pIsHandle">Indique si la la requête a été interprété</param>
         /// <returns></returns>
-        Task RespondAt(DevMessage pRequest, DevResponse pResponse);
+        Task RespondAt(DevMessage pRequest, DevResponse pResponse = null, bool pIsHandle = true);
     }
 }

@@ -63,6 +63,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Services\ILogsService.cs" />
     <Compile Include="Services\LogsService.cs" />
     <Compile Include="ViewModels\MainLogsViewModel.cs" />
     <Compile Include="Views\MainLogs.xaml.cs">
@@ -88,6 +89,16 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DevToolsConnector\DevToolsConnector.csproj">
+      <Project>{A00B0DD3-BB5D-4CE4-937F-2E1B643523A7}</Project>
+      <Name>DevToolsConnector</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DevToolsMessage\DevToolsMessage.csproj">
+      <Project>{230740AD-BA4C-486F-9A39-6231B86B5B3D}</Project>
+      <Name>DevToolsMessage</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

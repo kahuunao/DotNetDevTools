@@ -1,23 +1,25 @@
-﻿using Prism.Commands;
+﻿using DevToolsMessage.Request;
+
+using Logs.Services;
+
 using Prism.Mvvm;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
+using System.Collections.ObjectModel;
 
 namespace Logs.ViewModels
 {
     public class MainLogsViewModel : BindableBase
     {
-        private string _message;
-        public string Message
+        private ObservableCollection<DevLogLine> _logs;
+        public ObservableCollection<DevLogLine> Logs
         {
-            get { return _message; }
-            set { SetProperty(ref _message, value); }
+            get { return _logs; }
+            set { SetProperty(ref _logs, value); }
         }
 
-        public MainLogsViewModel()
+        public MainLogsViewModel(ILogsService pLogsService)
         {
-            Message = "Vue des logs";
+            Logs = pLogsService.Logs;
         }
     }
 }

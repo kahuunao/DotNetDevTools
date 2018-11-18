@@ -58,7 +58,7 @@ namespace Communication.ViewModels
                 await _devTool.SendMessage(new DevMessage
                 {
                     Id = Guid.NewGuid(),
-                    RequestType = EnumDevMessageType.GET_FILE_CONFIG,
+                    RequestType = EnumDevMessageType.GET_LOG_CONFIG
                 });
             }
         }

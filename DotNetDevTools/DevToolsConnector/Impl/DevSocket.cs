@@ -34,6 +34,7 @@ namespace DevToolsConnector.Impl
                 if (_isConnected != value)
                 {
                     _isConnected = value;
+                    LOGGER.Debug("IsConnected: {0}", _isConnected);
                     OnConnectionChanged?.Invoke(this, EventArgs.Empty);
                 }
             }
@@ -61,7 +62,6 @@ namespace DevToolsConnector.Impl
                 var newSocket = new TcpClient();
                 LOGGER.Debug("Connexion vers le serveur {0}", pRemote);
                 await newSocket.ConnectAsync(pRemote.Host, pRemote.Port);
-                LOGGER.Debug("Connected: {0}", newSocket.Connected);
                 if (newSocket.Connected)
                 {
                     SetSocket(newSocket);
@@ -138,11 +138,14 @@ namespace DevToolsConnector.Impl
 
         private void SetSocket(TcpClient pSocket)
         {
-            IsConnected = pSocket != null && pSocket.Connected;
-            if (IsConnected)
+            if (pSocket != null && pSocket.Connected)
             {
                 Socket = pSocket;
                 _stream = Socket.GetStream();
+
+                // Dispatch un évènement donc doit être setter après le stream et la socket
+                IsConnected = pSocket != null && pSocket.Connected; 
+
                 Listen().RunSafe();
                 AutoPing().RunSafe();
             }
@@ -190,12 +193,23 @@ namespace DevToolsConnector.Impl
             }
         }
 
-        public async Task RespondAt(DevMessage pRequest, DevResponse pResponse)
+        public async Task RespondAt(DevMessage pRequest, DevResponse pResponse = null, bool pIsHandle = true)
         {
             if (pRequest != null && pRequest.Id != Guid.Empty)
             {
-                pRequest.Response = pResponse;
-                await Send(pRequest);
+                if (pResponse == null)
+                {
+                    pResponse = new DevResponse();
+                }
+
+                var message = new DevMessage
+                {
+                    Id = pRequest.Id,
+                    RequestType = pRequest.RequestType,
+                    Response = pResponse
+                };
+                pResponse.IsHandled = pIsHandle;
+                await Send(message);
             }
         }
 
@@ -246,7 +260,7 @@ namespace DevToolsConnector.Impl
                 responseData = await ReadMessage(buffer, size.Value);
             }
             // Traitement du message
-            if (responseData != null)
+            if (!string.IsNullOrEmpty(responseData))
             {
                 OnMessage(responseData);
             }
@@ -264,9 +278,12 @@ namespace DevToolsConnector.Impl
             if (byteRead > 0)
             {
                 size = BitConverter.ToInt32(sizeDatas, 0);
+                LOGGER.Debug("Taille du prochain message: {0}", size);
             }
-
-            LOGGER.Debug("Taille du prochain message: {0}", size);
+            else
+            {
+                await AutoPing(); // Check de l'état de la connexion
+            }
             return size;
         }
 
@@ -306,8 +323,11 @@ namespace DevToolsConnector.Impl
         {
             try
             {
-                DevMessage messageRead = Serializer.DeserializeObject<DevMessage>(pMessage);
-                OnMessageReceived?.Invoke(this, new DevMessageReceivedEventArg(messageRead));
+                if (!string.IsNullOrEmpty(pMessage))
+                {
+                    DevMessage messageRead = Serializer?.DeserializeObject<DevMessage>(pMessage);
+                    OnMessageReceived?.Invoke(this, new DevMessageReceivedEventArg(messageRead));
+                }
             }
             catch (Exception e)
             {
@@ -325,6 +345,7 @@ namespace DevToolsConnector.Impl
             {
                 try
                 {
+                    LOGGER.Trace("Vérification de l'état de la connexion");
                     await _stream.WriteAsync(new byte[0], 0, 0);
                     await _stream.FlushAsync();
                     await Task.Delay(500);

@@ -1,4 +1,5 @@
-﻿using Logs.Views;
+﻿using Logs.Services;
+using Logs.Views;
 using Prism.Ioc;
 using Prism.Modularity;
 using Prism.Regions;
@@ -15,7 +16,7 @@ namespace Logs
 
         public void RegisterTypes(IContainerRegistry containerRegistry)
         {
-            
+            containerRegistry.RegisterSingleton<ILogsService, LogsService>();
         }
     }
 }

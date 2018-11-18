@@ -21,7 +21,7 @@ namespace DevToolsConnector
         public DevTransaction(IDevSocket pSocket, DevMessage pRequest)
         {
             _socket = pSocket;
-            _socket.OnConnectionChanged += OnConnectionClosed;
+            _socket.OnConnectionChanged += OnConnectionChanged;
             _socket.OnMessageReceived += OnMessageReceived;
             _request = pRequest;
             _response = new TaskCompletionSource<DevMessage>();
@@ -34,6 +34,11 @@ namespace DevToolsConnector
             {
                 await _socket.Send(_request);
                 result = await _response.Task;
+            }
+            catch(TaskCanceledException)
+            {
+                LOGGER.Warn("Annulation de l'échange");
+                _response.TrySetCanceled();
             }
             catch (Exception e)
             {
@@ -56,20 +61,24 @@ namespace DevToolsConnector
             }
         }
 
-        private void OnConnectionClosed(object sender, EventArgs e)
+        private void OnConnectionChanged(object sender, EventArgs e)
         {
-            switch (_response.Task.Status)
+            if (!_socket.IsConnected)
             {
-                case TaskStatus.Created:
-                case TaskStatus.Running:
-                case TaskStatus.WaitingForActivation:
-                case TaskStatus.WaitingForChildrenToComplete:
-                case TaskStatus.WaitingToRun:
-                    _response.TrySetCanceled();
-                    break;
-                default:
-                    // OSEF
-                    break;
+                switch (_response.Task.Status)
+                {
+                    case TaskStatus.Created:
+                    case TaskStatus.Running:
+                    case TaskStatus.WaitingForActivation:
+                    case TaskStatus.WaitingForChildrenToComplete:
+                    case TaskStatus.WaitingToRun:
+                        LOGGER.Warn("Annulation de l'échange");
+                        _response.TrySetCanceled();
+                        break;
+                    default:
+                        // OSEF
+                        break;
+                }
             }
         }
     }

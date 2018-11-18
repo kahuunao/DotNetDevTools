@@ -1,11 +1,16 @@
-﻿using System;
+﻿using NLog;
+using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace DevToolsConnector
 {
     public static class TaskExtensions
     {
-        public static async void RunSafe(this Task pThis, Action<Exception> pErrorHandler = null)
+        private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
+
+        public static async void RunSafe(this Task pThis, Action<Exception> pErrorHandler = null, [CallerFilePath] string pCaller = null, [CallerMemberName] string pMethodName = null)
         {
             try
             {
@@ -13,6 +18,7 @@ namespace DevToolsConnector
             }
             catch (Exception ex)
             {
+                LOGGER.Error(ex, "Error from: File {0}, Method {1}", pCaller, pMethodName);
                 pErrorHandler?.Invoke(ex);
             }
         }

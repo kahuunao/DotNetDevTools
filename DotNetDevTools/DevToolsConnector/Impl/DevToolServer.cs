@@ -1,5 +1,9 @@
-﻿using NLog;
+﻿using DevToolsMessage;
+using DevToolsMessage.Response;
 
+using NLog;
+
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
@@ -21,6 +25,7 @@ namespace DevToolsConnector.Impl
         public DevToolServer(IDevSocketFactory pFactory)
         {
             _factory = pFactory;
+            RegisterListener(EnumDevMessageType.IDENTIFICATION, IdentificationRequestHandler);
         }
 
         /// <summary>
@@ -31,7 +36,7 @@ namespace DevToolsConnector.Impl
         public void Bound(int? pPort = null)
         {
             Close();
-            
+
             IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Loopback, pPort ?? 12000);
             LOGGER.Debug("Démarrage du serveur ", localEndPoint);
             _server = new TcpListener(localEndPoint);
@@ -73,6 +78,17 @@ namespace DevToolsConnector.Impl
 
             _server?.Stop();
             _server = null;
+        }
+
+        private void IdentificationRequestHandler(IDevSocket pSocket, DevMessage pMessage)
+        {
+            pSocket.RespondAt(pMessage, new DevResponse
+            {
+                Identification = new DevIdentificationResponse
+                {
+                    AppName = AppDomain.CurrentDomain.FriendlyName
+                }
+            });
         }
     }
 }

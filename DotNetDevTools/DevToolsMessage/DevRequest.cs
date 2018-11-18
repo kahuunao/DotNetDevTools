@@ -1,10 +1,12 @@
-﻿using System;
+﻿using DevToolsMessage.Request;
+
 using System.Collections.Generic;
-using System.Text;
 
 namespace DevToolsMessage
 {
     public class DevRequest
     {
+        public DevIdentificationRequest Identification { get; set; }
+        public List<DevLogLine> LogLine { get; set; }
     }
 }

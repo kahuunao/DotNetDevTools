@@ -3,7 +3,9 @@
     public enum EnumDevMessageType
     {
         UNDEFINED,
-        GET_FILE_CONFIG,
+        IDENTIFICATION,
+        GET_LOG_CONFIG,
+        SET_LOG_CONFIG,
         LOG_LINE
     }
 }
