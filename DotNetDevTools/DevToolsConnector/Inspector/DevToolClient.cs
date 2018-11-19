@@ -2,7 +2,6 @@
 using DevToolsConnector.Common;
 
 using DevToolsMessage;
-using DevToolsMessage.Request;
 
 using NLog;
 
@@ -55,11 +54,6 @@ namespace DevToolsConnector.Inspector
             Socket.OnConnectionChanged += OnConnectionChangedHandler;
             Socket.OnMessageReceived += OnMessageReceivedHandler;
             var isConnected = await Socket.Connect(pRemote);
-
-            // Demande d'informations de l'application distante
-            var remoteApp = await Identification();
-
-            OnConnectChanged?.Invoke(this, EventArgs.Empty);
             return Socket.IsConnected;
         }
 
@@ -67,24 +61,19 @@ namespace DevToolsConnector.Inspector
         {
             if (Socket != null)
             {
+                Socket.OnConnectionChanged -= OnConnectionChangedHandler;
+                Socket.OnMessageReceived -= OnMessageReceivedHandler;
                 Socket.Close();
                 Socket = null;
+
+                // Force le dispatch de la déconnexion
+                OnConnectChanged?.Invoke(this, EventArgs.Empty);
             }
-            OnConnectChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public Task<IDevMessage> SendMessage(IDevMessage pRequest)
         {
             return new DevTransaction(Socket, pRequest).Send();
-        }
-
-        private Task<IDevMessage> Identification()
-        {
-            return SendMessage(new DevRequest
-            {
-                Type = "IDENTIFICATION", // FIXME
-                Identification = new DevIdentificationRequest()
-            });
         }
 
         private void OnConnectionChangedHandler(object sender, EventArgs e)

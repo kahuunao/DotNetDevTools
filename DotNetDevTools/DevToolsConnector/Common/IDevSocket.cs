@@ -45,6 +45,6 @@ namespace DevToolsConnector.Common
         /// <param name="pResponse">Réponse à celle-ci</param>
         /// <param name="pIsHandle">Indique si la la requête a été interprété</param>
         /// <returns></returns>
-        Task RespondAt(IDevMessage pRequest, DevResponse pResponse = null, bool pIsHandle = true);
+        Task RespondAt(IDevRequest pRequest, IDevResponse pResponse = null, bool pIsHandle = true);
     }
 }

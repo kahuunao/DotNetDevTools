@@ -1,4 +1,4 @@
-﻿using DevToolsMessage.Request;
+﻿using DevToolsTestMessage;
 
 using System.Collections.ObjectModel;
 
@@ -6,6 +6,6 @@ namespace Logs.Services
 {
     public interface ILogsService
     {
-        ObservableCollection<DevLogLine> Logs { get; }
+        ObservableCollection<Log> Logs { get; }
     }
 }

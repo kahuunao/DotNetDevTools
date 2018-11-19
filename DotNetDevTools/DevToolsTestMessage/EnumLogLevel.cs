@@ -1,4 +1,4 @@
-﻿namespace DevToolsMessage.Request
+﻿namespace DevToolsTestMessage
 {
     public enum EnumLogLevel
     {

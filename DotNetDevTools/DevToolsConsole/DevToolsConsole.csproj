@@ -17,6 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DevToolsConnector\DevToolsConnector.csproj" />
     <ProjectReference Include="..\DevToolsMessage\DevToolsMessage.csproj" />
+    <ProjectReference Include="..\DevToolsTestMessage\DevToolsTestMessage.csproj" />
   </ItemGroup>
 
   <ItemGroup>

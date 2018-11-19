@@ -1,4 +1,4 @@
-﻿using DevToolsMessage.Request;
+﻿using DevToolsTestMessage;
 
 using Logs.Services;
 
@@ -10,8 +10,8 @@ namespace Logs.ViewModels
 {
     public class MainLogsViewModel : BindableBase
     {
-        private ObservableCollection<DevLogLine> _logs;
-        public ObservableCollection<DevLogLine> Logs
+        private ObservableCollection<Log> _logs;
+        public ObservableCollection<Log> Logs
         {
             get { return _logs; }
             set { SetProperty(ref _logs, value); }

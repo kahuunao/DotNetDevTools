@@ -4,6 +4,8 @@ using DevToolsClient.Views;
 
 using DevToolsConnector.Common;
 using DevToolsConnector.Inspector;
+using DevToolsConnector.Serializer;
+using DevToolsConnector.Serializer.JSON;
 
 using Logs;
 

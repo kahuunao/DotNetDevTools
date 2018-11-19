@@ -1,8 +1,11 @@
 ﻿using DevToolsConnector.Common;
 using DevToolsConnector.Inspected;
+using DevToolsConnector.Serializer.JSON;
 
 using DevToolsMessage;
-using DevToolsMessage.Response;
+
+using DevToolsTestMessage.Request;
+using DevToolsTestMessage.Response;
 
 using NLog;
 using NLog.Config;
@@ -35,46 +38,33 @@ namespace DevToolsConsole
             var serializer = new NewtonsoftSerializer();
             var server = new DevToolServer(new DevSocketFactory(serializer));
             server.Bound();
-            server.RegisterListener("IDENTIFICATION", IdentificationRequestHandler);
-            server.RegisterListener("GET_LOG_CONFIG", OnGetLogConfig);
-            server.RegisterListener("SET_LOG_CONFIG", OnSetLogConfig);
+            server.RegisterListener<DevIdentificationRequest>(IdentificationRequestHandler);
+            server.RegisterListener<DevStartSendLogsRequest>(OnSetLogConfig);
 
             LOGGER.Debug("Enter to stop console.");
             Console.ReadLine();
 
-            server.UnRegisterListener("IDENTIFICATION", IdentificationRequestHandler);
-            server.UnRegisterListener("GET_LOG_CONFIG", OnGetLogConfig);
-            server.UnRegisterListener("SET_LOG_CONFIG", OnSetLogConfig);
+            server.UnRegisterListener<DevIdentificationRequest>(IdentificationRequestHandler);
+            server.UnRegisterListener<DevStartSendLogsRequest>(OnSetLogConfig);
             server.Close();
         }
 
         private static void IdentificationRequestHandler(IDevSocket pSocket, IDevMessage pMessage)
         {
-            if (pMessage is IDevRequest)
+            if (pMessage is IDevRequest request)
             {
-                pSocket.RespondAt(pMessage, new DevResponse
+                pSocket.RespondAt(request, new DevIdentificationResponse
                 {
-                    Identification = new DevIdentificationResponse
-                    {
-                        AppName = AppDomain.CurrentDomain.FriendlyName
-                    }
+                    AppName = AppDomain.CurrentDomain.FriendlyName
                 });
-            }
-        }
-
-        private static async void OnGetLogConfig(IDevSocket pSocket, IDevMessage pMessage)
-        {
-            if (pMessage is IDevRequest)
-            {
-                await pSocket.RespondAt(pMessage, new DevResponse());
             }
         }
 
         private static async void OnSetLogConfig(IDevSocket pSocket, IDevMessage pMessage)
         {
-            if (pMessage is IDevRequest)
+            if (pMessage is IDevRequest request)
             {
-                await pSocket.RespondAt(pMessage, new DevResponse());
+                await pSocket.RespondAt(request);
                 _targetOuput.Socket = pSocket;
                 CreateRandomLogs().RunSafe();
             }

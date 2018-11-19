@@ -1,7 +1,8 @@
 ﻿using DevToolsMessage;
 using Newtonsoft.Json;
+using System.Collections.Generic;
 
-namespace DevToolsConnector.Common
+namespace DevToolsConnector.Serializer.JSON
 {
     public class NewtonsoftSerializer : IDevMessageSerializer
     {
@@ -13,19 +14,19 @@ namespace DevToolsConnector.Common
             {
                 NullValueHandling = NullValueHandling.Ignore,
                 MissingMemberHandling = MissingMemberHandling.Ignore,
+                TypeNameHandling = TypeNameHandling.Auto
             };
         }
 
         public IDevMessage DeserializeObject(string pData)
         {
-            // FIXME ne marchera pas !!
-            var request = JsonConvert.DeserializeObject(pData, _setting);
-            return request as IDevMessage;
+            DevMessageProxy request = JsonConvert.DeserializeObject<DevMessageProxy>(pData, _setting);
+            return request?.Message;
         }
 
         public string SerializeObject(IDevMessage pData)
         {
-            var request = JsonConvert.SerializeObject(pData, _setting);
+            var request = JsonConvert.SerializeObject(new DevMessageProxy(pData), _setting);
             return request;
         }
     }

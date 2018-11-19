@@ -1,6 +1,6 @@
 ﻿using DevToolsMessage;
 
-namespace DevToolsConnector.Common
+namespace DevToolsConnector.Serializer
 {
     public interface IDevMessageSerializer
     {
