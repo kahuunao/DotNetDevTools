@@ -1,8 +1,10 @@
-﻿namespace DevToolsConnector.Common
+﻿using DevToolsMessage;
+
+namespace DevToolsConnector.Common
 {
     public interface IDevMessageSerializer
     {
-        T DeserializeObject<T>(string pMessage);
-        string SerializeObject(object pData);
+        IDevMessage DeserializeObject(string pMessage);
+        string SerializeObject(IDevMessage pData);
     }
 }

@@ -55,9 +55,9 @@ namespace Communication.ViewModels
         {
             if (await _devTool.Connect(Remote))
             {
-                await _devTool.SendMessage(new DevMessage
+                await _devTool.SendMessage(new DevRequest
                 {
-                    RequestType = EnumDevMessageType.GET_LOG_CONFIG
+                    Type = "GET_LOG_CONFIG" // FIXME
                 });
             }
         }

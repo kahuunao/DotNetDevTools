@@ -11,9 +11,9 @@ namespace DevToolsConnector.Common
     {
         private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
-        private Dictionary<EnumDevMessageType, List<IDevListener>> _listeners = new Dictionary<EnumDevMessageType, List<IDevListener>>();
+        private Dictionary<string, List<IDevListener>> _listeners = new Dictionary<string, List<IDevListener>>();
 
-        public void RegisterListener(EnumDevMessageType pType, IDevListener pListener)
+        public void RegisterListener(string pType, IDevListener pListener)
         {
             var ls = GetListeners(pType);
             if (!ls.Contains(pListener))
@@ -22,17 +22,17 @@ namespace DevToolsConnector.Common
             }
         }
 
-        public void RegisterListener(EnumDevMessageType pType, Action<IDevSocket, DevMessage> pListener)
+        public void RegisterListener(string pType, Action<IDevSocket, IDevMessage> pListener)
         {
             RegisterListener(pType, new FuncDevListener(pListener));
         }
 
-        public void UnRegisterListener(EnumDevMessageType pType, IDevListener pListener)
+        public void UnRegisterListener(string pType, IDevListener pListener)
         {
             GetListeners(pType).Remove(pListener);
         }
 
-        public void UnRegisterListener(EnumDevMessageType pType, Action<IDevSocket, DevMessage> pListener)
+        public void UnRegisterListener(string pType, Action<IDevSocket, IDevMessage> pListener)
         {
             GetListeners(pType).RemoveAll((l) => l is FuncDevListener f && f.Fct == pListener);
         }
@@ -45,7 +45,7 @@ namespace DevToolsConnector.Common
             }
         }
 
-        public void UnRegisterListener(Action<IDevSocket, DevMessage> pListener)
+        public void UnRegisterListener(Action<IDevSocket, IDevMessage> pListener)
         {
             foreach (var key in _listeners.Keys)
             {
@@ -60,7 +60,7 @@ namespace DevToolsConnector.Common
 
         public abstract void Close();
 
-        protected List<IDevListener> GetListeners(EnumDevMessageType pType)
+        protected List<IDevListener> GetListeners(string pType)
         {
             if (!_listeners.ContainsKey(pType))
             {
@@ -69,15 +69,15 @@ namespace DevToolsConnector.Common
             return _listeners[pType];
         }
 
-        protected void DispatchMessage(IDevSocket pSocket, DevMessage pMessage)
+        protected void DispatchMessage(IDevSocket pSocket, IDevMessage pMessage)
         {
             bool hasListener = false;
-            GetListeners(pMessage.RequestType).ForEach((l) =>
+            GetListeners(pMessage.Type).ForEach((l) =>
             {
                 try
                 {
                     hasListener = true;
-                    l?.HandleResponse(pSocket, pMessage);
+                    l?.HandleMessage(pSocket, pMessage);
                 }
                 catch (Exception e)
                 {
@@ -85,7 +85,7 @@ namespace DevToolsConnector.Common
                 }
             });
 
-            if (!hasListener && pMessage.IsRequest())
+            if (!hasListener && pMessage is IDevRequest)
             {
                 // Message non interprété
                 pSocket.RespondAt(pMessage, null, false);

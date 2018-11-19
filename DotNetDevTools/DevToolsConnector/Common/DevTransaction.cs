@@ -15,19 +15,19 @@ namespace DevToolsConnector.Common
         private readonly static Logger LOGGER = LogManager.GetCurrentClassLogger();
 
         private IDevSocket _socket;
-        private DevMessage _request;
-        private TaskCompletionSource<DevMessage> _response;
+        private IDevMessage _request;
+        private TaskCompletionSource<IDevMessage> _response;
 
-        public DevTransaction(IDevSocket pSocket, DevMessage pRequest)
+        public DevTransaction(IDevSocket pSocket, IDevMessage pRequest)
         {
             _socket = pSocket;
             _request = pRequest;
-            _response = new TaskCompletionSource<DevMessage>();
+            _response = new TaskCompletionSource<IDevMessage>();
         }
 
-        public async Task<DevMessage> Send()
+        public async Task<IDevMessage> Send()
         {
-            DevMessage result = null;
+            IDevMessage result = null;
             try
             {
                 if (_socket.IsConnected)
@@ -58,7 +58,7 @@ namespace DevToolsConnector.Common
             return result;
         }
 
-        private bool IsSameTransaction(DevMessage pRequest, DevMessage pResponse)
+        private bool IsSameTransaction(IDevMessage pRequest, IDevMessage pResponse)
         {
             return pRequest != null && pResponse != null && pRequest.Id == pResponse.Id;
         }

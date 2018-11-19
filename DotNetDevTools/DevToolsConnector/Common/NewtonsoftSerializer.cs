@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using DevToolsMessage;
+using Newtonsoft.Json;
 
 namespace DevToolsConnector.Common
 {
@@ -15,13 +16,14 @@ namespace DevToolsConnector.Common
             };
         }
 
-        public T DeserializeObject<T>(string pData)
+        public IDevMessage DeserializeObject(string pData)
         {
-            var request = JsonConvert.DeserializeObject<T>(pData, _setting);
-            return request;
+            // FIXME ne marchera pas !!
+            var request = JsonConvert.DeserializeObject(pData, _setting);
+            return request as IDevMessage;
         }
 
-        public string SerializeObject(object pData)
+        public string SerializeObject(IDevMessage pData)
         {
             var request = JsonConvert.SerializeObject(pData, _setting);
             return request;

@@ -73,20 +73,17 @@ namespace DevToolsConnector.Inspector
             OnConnectChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        public Task<DevMessage> SendMessage(DevMessage pRequest)
+        public Task<IDevMessage> SendMessage(IDevMessage pRequest)
         {
             return new DevTransaction(Socket, pRequest).Send();
         }
 
-        private Task<DevMessage> Identification()
+        private Task<IDevMessage> Identification()
         {
-            return SendMessage(new DevMessage
+            return SendMessage(new DevRequest
             {
-                RequestType = EnumDevMessageType.IDENTIFICATION,
-                Request = new DevRequest
-                {
-                    Identification = new DevIdentificationRequest()
-                }
+                Type = "IDENTIFICATION", // FIXME
+                Identification = new DevIdentificationRequest()
             });
         }
 

@@ -6,9 +6,9 @@ namespace DevToolsConnector.Common
 {
     public class DevMessageReceivedEventArg : EventArgs
     {
-        public DevMessage MessageReceived { get; private set; }
+        public IDevMessage MessageReceived { get; private set; }
 
-        public DevMessageReceivedEventArg(DevMessage pMessage)
+        public DevMessageReceivedEventArg(IDevMessage pMessage)
         {
             MessageReceived = pMessage;
         }

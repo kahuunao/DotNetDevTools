@@ -6,12 +6,12 @@ namespace DevToolsConnector.Common
 {
     public interface IDevToolConnector
     {
-        void RegisterListener(EnumDevMessageType pType, IDevListener pListener);
-        void RegisterListener(EnumDevMessageType pType, Action<IDevSocket, DevMessage> pListener);
-        void UnRegisterListener(EnumDevMessageType pType, IDevListener pListener);
-        void UnRegisterListener(EnumDevMessageType pType, Action<IDevSocket, DevMessage> pListener);
+        void RegisterListener(string pType, IDevListener pListener);
+        void RegisterListener(string pType, Action<IDevSocket, IDevMessage> pListener);
+        void UnRegisterListener(string pType, IDevListener pListener);
+        void UnRegisterListener(string pType, Action<IDevSocket, IDevMessage> pListener);
         void UnRegisterListener(IDevListener pListener);
-        void UnRegisterListener(Action<IDevSocket, DevMessage> pListener);
+        void UnRegisterListener(Action<IDevSocket, IDevMessage> pListener);
         void Close();
     }
 }

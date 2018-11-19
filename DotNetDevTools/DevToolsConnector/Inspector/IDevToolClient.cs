@@ -14,6 +14,6 @@ namespace DevToolsConnector.Inspector
         event EventHandler OnConnectChanged;
         bool IsConnected { get; }
         Task<bool> Connect(Uri remote);
-        Task<DevMessage> SendMessage(DevMessage pRequest);
+        Task<IDevMessage> SendMessage(IDevMessage pRequest);
     }
 }

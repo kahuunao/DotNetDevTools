@@ -22,19 +22,19 @@ namespace Logs.Services
         public LogsService(IDevToolClient pClient)
         {
             _client = pClient;
-            _client.RegisterListener(EnumDevMessageType.LOG_LINE, OnLogReceived);
+            _client.RegisterListener("LOG_LINE", OnLogReceived); // FIXME
             _client.OnConnectChanged += OnConnectChangedHandler;
             RequestLogs().RunSafe();
         }
 
-        private void OnLogReceived(IDevSocket pSocket, DevMessage pMessage)
+        private void OnLogReceived(IDevSocket pSocket, IDevMessage pMessage)
         {
-            if (pMessage.IsRequest())
+            if (pMessage is DevRequest request)
             {
                 LOGGER.Debug("Réception de logs");
-                if (pMessage != null && pMessage.Request != null && pMessage.Request.LogLine != null)
+                if (request.LogLine != null)
                 {
-                    Logs.AddRange(pMessage.Request.LogLine);
+                    Logs.AddRange(request.LogLine);
                 }
                 pSocket.RespondAt(pMessage);
             }
@@ -50,10 +50,9 @@ namespace Logs.Services
             if (_client.IsConnected)
             {
                 LOGGER.Debug("Envoi de la configuration des logs attendues");
-                await _client.SendMessage(new DevMessage
+                await _client.SendMessage(new DevRequest
                 {
-                    RequestType = EnumDevMessageType.SET_LOG_CONFIG,
-                    Request = new DevRequest()
+                    Type = "SET_LOG_CONFIG" // FIXME
                 });
             }
         }

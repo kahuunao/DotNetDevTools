@@ -151,7 +151,7 @@ namespace DevToolsConnector.Common
             }
         }
 
-        public async Task Send(DevMessage pRequest)
+        public async Task Send(IDevMessage pRequest)
         {
             if (pRequest == null)
             {
@@ -193,7 +193,7 @@ namespace DevToolsConnector.Common
             }
         }
 
-        public async Task RespondAt(DevMessage pRequest, DevResponse pResponse = null, bool pIsHandle = true)
+        public async Task RespondAt(IDevMessage pRequest, DevResponse pResponse = null, bool pIsHandle = true)
         {
             if (pRequest != null && pRequest.Id != Guid.Empty)
             {
@@ -202,14 +202,9 @@ namespace DevToolsConnector.Common
                     pResponse = new DevResponse();
                 }
 
-                var message = new DevMessage
-                {
-                    Id = pRequest.Id,
-                    RequestType = pRequest.RequestType,
-                    Response = pResponse
-                };
+                pResponse.Id = pRequest.Id;
                 pResponse.IsHandled = pIsHandle;
-                await Send(message);
+                await Send(pResponse);
             }
         }
 
@@ -326,7 +321,7 @@ namespace DevToolsConnector.Common
             {
                 if (!string.IsNullOrEmpty(pMessage))
                 {
-                    DevMessage messageRead = Serializer?.DeserializeObject<DevMessage>(pMessage);
+                    IDevMessage messageRead = Serializer?.DeserializeObject(pMessage);
                     OnMessageReceived?.Invoke(this, new DevMessageReceivedEventArg(messageRead));
                 }
             }

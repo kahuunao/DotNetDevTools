@@ -6,14 +6,14 @@ namespace DevToolsConnector.Common
 {
     public class FuncDevListener : IDevListener
     {
-        public Action<IDevSocket, DevMessage> Fct { get; set; }
+        public Action<IDevSocket, IDevMessage> Fct { get; set; }
 
-        public FuncDevListener(Action<IDevSocket, DevMessage> pFct)
+        public FuncDevListener(Action<IDevSocket, IDevMessage> pFct)
         {
             Fct = pFct;
         }
 
-        public void HandleResponse(IDevSocket pSocket, DevMessage pMessage)
+        public void HandleMessage(IDevSocket pSocket, IDevMessage pMessage)
         {
             Fct?.Invoke(pSocket, pMessage);
         }

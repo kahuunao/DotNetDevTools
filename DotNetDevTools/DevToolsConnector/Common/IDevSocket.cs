@@ -10,7 +10,7 @@ namespace DevToolsConnector.Common
     {
         event EventHandler OnConnectionChanged;
         /// <summary>
-        /// Réception d'un message <see cref="DevMessage"/>
+        /// Réception d'un message <see cref="IDevMessage"/>
         /// </summary>
         event EventHandler<DevMessageReceivedEventArg> OnMessageReceived;
         /// <summary>
@@ -33,11 +33,11 @@ namespace DevToolsConnector.Common
         /// </summary>
         void Close();
         /// <summary>
-        /// Envoie le message <see cref="DevMessage"/>
+        /// Envoie le message <see cref="IDevMessage"/>
         /// </summary>
         /// <param name="pMessage"></param>
         /// <returns></returns>
-        Task Send(DevMessage pMessage);
+        Task Send(IDevMessage pMessage);
         /// <summary>
         /// Envoie la réponse à la requête
         /// </summary>
@@ -45,6 +45,6 @@ namespace DevToolsConnector.Common
         /// <param name="pResponse">Réponse à celle-ci</param>
         /// <param name="pIsHandle">Indique si la la requête a été interprété</param>
         /// <returns></returns>
-        Task RespondAt(DevMessage pRequest, DevResponse pResponse = null, bool pIsHandle = true);
+        Task RespondAt(IDevMessage pRequest, DevResponse pResponse = null, bool pIsHandle = true);
     }
 }

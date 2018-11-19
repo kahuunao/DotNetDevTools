@@ -70,13 +70,10 @@ namespace DevToolsConnector.Inspected
         private void SendMessage(List<DevLogLine> pData)
         {
             var s = Socket;
-            s?.Send(new DevMessage
+            s?.Send(new DevRequest
             {
-                RequestType = EnumDevMessageType.LOG_LINE,
-                Request = new DevRequest
-                {
-                    LogLine = pData
-                }
+                Type = "LOG_LINE", // FIXME
+                LogLine = pData
             });
         }
     }
