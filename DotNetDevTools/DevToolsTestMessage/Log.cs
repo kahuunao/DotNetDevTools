@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace DevToolsMessage.Request
+namespace DevToolsTestMessage
 {
-    public class DevLogLine
+    public class Log
     {
         public DateTime? Date { get; set; }
         public EnumLogLevel Level { get; set; }

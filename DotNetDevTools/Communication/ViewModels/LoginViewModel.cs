@@ -2,7 +2,7 @@
 using DevToolsConnector.Inspector;
 
 using DevToolsMessage;
-
+using DevToolsTestMessage.Request;
 using Prism.Commands;
 using Prism.Mvvm;
 
@@ -53,13 +53,7 @@ namespace Communication.ViewModels
 
         private async Task Start()
         {
-            if (await _devTool.Connect(Remote))
-            {
-                await _devTool.SendMessage(new DevMessage
-                {
-                    RequestType = EnumDevMessageType.GET_LOG_CONFIG
-                });
-            }
+            await _devTool.Connect(Remote);
         }
     }
 }

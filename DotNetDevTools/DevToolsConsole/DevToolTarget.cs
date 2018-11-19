@@ -1,7 +1,7 @@
 ﻿using DevToolsConnector.Common;
 
-using DevToolsMessage;
-using DevToolsMessage.Request;
+using DevToolsTestMessage;
+using DevToolsTestMessage.Request;
 
 using NLog;
 using NLog.Common;
@@ -9,17 +9,12 @@ using NLog.Targets;
 
 using System.Collections.Generic;
 
-namespace DevToolsConnector.Inspected
+namespace DevToolsConsole
 {
     [Target("DevTool")]
     public class DevToolTarget : TargetWithLayout
     {
         public IDevSocket Socket { get; set; }
-
-        public DevToolTarget()
-        {
-            //Name = "DevTool";
-        }
 
         protected override void Write(AsyncLogEventInfo logEvent)
         {
@@ -29,7 +24,7 @@ namespace DevToolsConnector.Inspected
             }
 
             var log = ParseLog(logEvent);
-            var logs = new List<DevLogLine>
+            var logs = new List<Log>
             {
                 log
             };
@@ -47,18 +42,18 @@ namespace DevToolsConnector.Inspected
             SendMessage(logs);
         }
 
-        private DevLogLine ParseLog(AsyncLogEventInfo pLogEvent)
+        private Log ParseLog(AsyncLogEventInfo pLogEvent)
         {
             var nlogData = pLogEvent.LogEvent;
 
-            string logMessage = this.Layout.Render(nlogData);
-            return new DevLogLine
+            //string logMessage = this.Layout.Render(nlogData);
+            return new Log
             {
                 Date = nlogData.TimeStamp,
                 Level = ParseLevel(nlogData.Level),
                 Exception = nlogData.Exception,
                 LoggerName = nlogData.LoggerName,
-                Message = logMessage
+                Message = nlogData.FormattedMessage
             };
         }
 
@@ -67,16 +62,12 @@ namespace DevToolsConnector.Inspected
             return EnumLogLevel.DEBUG; // TODO
         }
 
-        private void SendMessage(List<DevLogLine> pData)
+        private void SendMessage(List<Log> pData)
         {
             var s = Socket;
-            s?.Send(new DevMessage
+            s?.Send(new DevLogsRequest
             {
-                RequestType = EnumDevMessageType.LOG_LINE,
-                Request = new DevRequest
-                {
-                    LogLine = pData
-                }
+                Logs = pData
             });
         }
     }

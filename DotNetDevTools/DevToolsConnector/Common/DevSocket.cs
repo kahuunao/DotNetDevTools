@@ -1,4 +1,6 @@
-﻿using DevToolsMessage;
+﻿using DevToolsConnector.Serializer;
+
+using DevToolsMessage;
 
 using NLog;
 
@@ -144,14 +146,14 @@ namespace DevToolsConnector.Common
                 _stream = Socket.GetStream();
 
                 // Dispatch un évènement donc doit être setter après le stream et la socket
-                IsConnected = pSocket != null && pSocket.Connected; 
+                IsConnected = pSocket != null && pSocket.Connected;
 
                 Listen().RunSafe();
                 CheckConnection().RunSafe();
             }
         }
 
-        public async Task Send(DevMessage pRequest)
+        public async Task Send(IDevMessage pRequest)
         {
             if (pRequest == null)
             {
@@ -193,23 +195,18 @@ namespace DevToolsConnector.Common
             }
         }
 
-        public async Task RespondAt(DevMessage pRequest, DevResponse pResponse = null, bool pIsHandle = true)
+        public async Task RespondAt(IDevRequest pRequest, IDevResponse pResponse = null, bool pIsHandle = true)
         {
             if (pRequest != null && pRequest.Id != Guid.Empty)
             {
                 if (pResponse == null)
                 {
-                    pResponse = new DevResponse();
+                    pResponse = new DevNoResponse();
                 }
 
-                var message = new DevMessage
-                {
-                    Id = pRequest.Id,
-                    RequestType = pRequest.RequestType,
-                    Response = pResponse
-                };
+                pResponse.Id = pRequest.Id;
                 pResponse.IsHandled = pIsHandle;
-                await Send(message);
+                await Send(pResponse);
             }
         }
 
@@ -312,8 +309,16 @@ namespace DevToolsConnector.Common
                 {
                     responseData += Encoding.ASCII.GetString(pBuffer, 0, byteRead);
                 }
-                byteRemaining -= byteRead;
-                LOGGER.Debug("Lecture de {0} bytes, Reste {1}", byteRead, byteRemaining);
+                if (byteRead == 0 && byteRemaining != 0)
+                {
+                    LOGGER.Warn("Réception d'un message incomplet et sera ignorée. Partie reçue : {0}", responseData);
+                    break;
+                }
+                else
+                {
+                    byteRemaining -= byteRead;
+                    LOGGER.Debug("Lecture de {0} bytes, Reste {1}", byteRead, byteRemaining);
+                }
             }
 
             LOGGER.Debug("Message reçue: {0}", responseData);
@@ -326,7 +331,7 @@ namespace DevToolsConnector.Common
             {
                 if (!string.IsNullOrEmpty(pMessage))
                 {
-                    DevMessage messageRead = Serializer?.DeserializeObject<DevMessage>(pMessage);
+                    IDevMessage messageRead = Serializer?.DeserializeObject(pMessage);
                     OnMessageReceived?.Invoke(this, new DevMessageReceivedEventArg(messageRead));
                 }
             }

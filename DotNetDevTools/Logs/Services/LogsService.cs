@@ -2,7 +2,9 @@
 using DevToolsConnector.Inspector;
 
 using DevToolsMessage;
-using DevToolsMessage.Request;
+
+using DevToolsTestMessage;
+using DevToolsTestMessage.Request;
 
 using NLog;
 
@@ -15,28 +17,28 @@ namespace Logs.Services
     {
         private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
-        public ObservableCollection<DevLogLine> Logs { get; private set; } = new ObservableCollection<DevLogLine>();
+        public ObservableCollection<Log> Logs { get; private set; } = new ObservableCollection<Log>();
 
         private readonly IDevToolClient _client;
 
         public LogsService(IDevToolClient pClient)
         {
             _client = pClient;
-            _client.RegisterListener(EnumDevMessageType.LOG_LINE, OnLogReceived);
+            _client.RegisterListener<DevLogsRequest>(OnLogReceived); // FIXME
             _client.OnConnectChanged += OnConnectChangedHandler;
             RequestLogs().RunSafe();
         }
 
-        private void OnLogReceived(IDevSocket pSocket, DevMessage pMessage)
+        private void OnLogReceived(IDevSocket pSocket, IDevMessage pMessage)
         {
-            if (pMessage.IsRequest())
+            if (pMessage is DevLogsRequest request)
             {
                 LOGGER.Debug("Réception de logs");
-                if (pMessage != null && pMessage.Request != null && pMessage.Request.LogLine != null)
+                if (request.Logs != null)
                 {
-                    Logs.AddRange(pMessage.Request.LogLine);
+                    Logs.AddRange(request.Logs);
                 }
-                pSocket.RespondAt(pMessage);
+                pSocket.RespondAt(request);
             }
         }
 
@@ -50,11 +52,7 @@ namespace Logs.Services
             if (_client.IsConnected)
             {
                 LOGGER.Debug("Envoi de la configuration des logs attendues");
-                await _client.SendMessage(new DevMessage
-                {
-                    RequestType = EnumDevMessageType.SET_LOG_CONFIG,
-                    Request = new DevRequest()
-                });
+                await _client.SendMessage(new DevStartSendLogsRequest());
             }
         }
     }

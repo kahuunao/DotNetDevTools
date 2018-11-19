@@ -1,4 +1,6 @@
-﻿namespace DevToolsConnector.Common
+﻿using DevToolsConnector.Serializer;
+
+namespace DevToolsConnector.Common
 {
     public class DevSocketFactory : IDevSocketFactory
     {

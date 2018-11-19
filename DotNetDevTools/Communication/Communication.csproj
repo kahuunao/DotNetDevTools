@@ -101,6 +101,10 @@
       <Project>{230740ad-ba4c-486f-9a39-6231b86b5b3d}</Project>
       <Name>DevToolsMessage</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DevToolsTestMessage\DevToolsTestMessage.csproj">
+      <Project>{B8018AF2-CE16-4864-B2B7-C3F323274C8A}</Project>
+      <Name>DevToolsTestMessage</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

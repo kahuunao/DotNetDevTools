@@ -11,47 +11,33 @@ namespace DevToolsConnector.Common
     {
         private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
 
-        private Dictionary<EnumDevMessageType, List<IDevListener>> _listeners = new Dictionary<EnumDevMessageType, List<IDevListener>>();
+        private Dictionary<string, List<IDevListener>> _listeners = new Dictionary<string, List<IDevListener>>();
 
-        public void RegisterListener(EnumDevMessageType pType, IDevListener pListener)
+        #region Register
+        public void RegisterListener<TMessage>(IDevListener pListener)
         {
-            var ls = GetListeners(pType);
+            var ls = GetListeners(typeof(TMessage));
             if (!ls.Contains(pListener))
             {
                 ls.Add(pListener);
             }
         }
 
-        public void RegisterListener(EnumDevMessageType pType, Action<IDevSocket, DevMessage> pListener)
+        public void RegisterListener<T>(Action<IDevSocket, IDevMessage> pListener)
         {
-            RegisterListener(pType, new FuncDevListener(pListener));
+            RegisterListener<T>(new FuncDevListener(pListener));
         }
 
-        public void UnRegisterListener(EnumDevMessageType pType, IDevListener pListener)
+        public void UnRegisterListener<T>(IDevListener pListener)
         {
-            GetListeners(pType).Remove(pListener);
+            GetListeners(typeof(T)).Remove(pListener);
         }
 
-        public void UnRegisterListener(EnumDevMessageType pType, Action<IDevSocket, DevMessage> pListener)
+        public void UnRegisterListener<T>(Action<IDevSocket, IDevMessage> pListener)
         {
-            GetListeners(pType).RemoveAll((l) => l is FuncDevListener f && f.Fct == pListener);
+            GetListeners(typeof(T)).RemoveAll((l) => l is FuncDevListener f && f.Fct == pListener);
         }
-
-        public void UnRegisterListener(IDevListener pListener)
-        {
-            foreach (var key in _listeners.Keys)
-            {
-                UnRegisterListener(key, pListener);
-            }
-        }
-
-        public void UnRegisterListener(Action<IDevSocket, DevMessage> pListener)
-        {
-            foreach (var key in _listeners.Keys)
-            {
-                UnRegisterListener(key, pListener);
-            }
-        }
+        #endregion
 
         public void ClearListeners()
         {
@@ -60,24 +46,34 @@ namespace DevToolsConnector.Common
 
         public abstract void Close();
 
-        protected List<IDevListener> GetListeners(EnumDevMessageType pType)
+        protected List<IDevListener> GetListeners(Type pMessageType)
         {
-            if (!_listeners.ContainsKey(pType))
+            if (pMessageType == null)
             {
-                _listeners.Add(pType, new List<IDevListener>());
+                return null;
             }
-            return _listeners[pType];
+            string messageType = pMessageType.FullName;
+            if (!_listeners.ContainsKey(messageType))
+            {
+                _listeners.Add(messageType, new List<IDevListener>());
+            }
+            return _listeners[messageType];
         }
 
-        protected void DispatchMessage(IDevSocket pSocket, DevMessage pMessage)
+        protected void DispatchMessage(IDevSocket pSocket, IDevMessage pMessage)
         {
+            if (pMessage == null)
+            {
+                return;
+            }
+
             bool hasListener = false;
-            GetListeners(pMessage.RequestType).ForEach((l) =>
+            GetListeners(pMessage?.GetType()).ForEach((l) =>
             {
                 try
                 {
                     hasListener = true;
-                    l?.HandleResponse(pSocket, pMessage);
+                    l?.HandleMessage(pSocket, pMessage);
                 }
                 catch (Exception e)
                 {
@@ -85,10 +81,10 @@ namespace DevToolsConnector.Common
                 }
             });
 
-            if (!hasListener && pMessage.IsRequest())
+            if (!hasListener && pMessage is IDevRequest request)
             {
                 // Message non interprété
-                pSocket.RespondAt(pMessage, null, false);
+                pSocket.RespondAt(request, null, false);
             }
         }
     }
